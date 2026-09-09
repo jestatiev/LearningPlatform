@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Learning Platform</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header>
+  <h1>📚 Learning Platform</h1>
+  <nav id="mainNav">
+    <button data-view="courses" class="active">Tečajevi</button>
+    <button data-view="myEnrollments" class="authOnly" style="display:none">Moji tečajevi</button>
+    <button data-view="admin" class="adminOnly" style="display:none">Administracija</button>
+    <button data-view="auth" id="authNavBtn">Prijava</button>
+    <button id="logoutBtn" style="display:none">Odjava (<span id="usernameLabel"></span>)</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- AUTH VIEW -->
+  <section id="view-auth" class="view">
+    <div class="tabs">
+      <button data-authtab="login" class="active">Prijava</button>
+      <button data-authtab="register">Registracija</button>
+    </div>
+
+    <div class="card" id="loginCard">
+      <h3>Prijava</h3>
+      <label>Korisničko ime</label>
+      <input id="loginUsername" placeholder="npr. admin" />
+      <label>Lozinka</label>
+      <input id="loginPassword" type="password" placeholder="npr. Admin123!" />
+      <button class="btn btn-primary" onclick="handleLogin()">Prijavi se</button>
+      <p class="muted">Admin nalog za testiranje: <b>admin</b> / <b>Admin123!</b></p>
+      <div id="loginMsg"></div>
+    </div>
+
+    <div class="card" id="registerCard" style="display:none">
+      <h3>Registracija (novi Student)</h3>
+      <label>Korisničko ime</label>
+      <input id="regUsername" />
+      <label>Email</label>
+      <input id="regEmail" type="email" />
+      <label>Ime i prezime</label>
+      <input id="regFullName" />
+      <label>Lozinka</label>
+      <input id="regPassword" type="password" />
+      <button class="btn btn-primary" onclick="handleRegister()">Registriraj se</button>
+      <div id="registerMsg"></div>
+    </div>
+  </section>
+
+  <!-- COURSES VIEW -->
+  <section id="view-courses" class="view active">
+    <div class="card">
+      <label>Filtriraj po kategoriji</label>
+      <select id="categoryFilter" onchange="loadCourses()">
+        <option value="">Sve kategorije</option>
+      </select>
+    </div>
+    <div id="coursesGrid" class="grid"></div>
+  </section>
+
+  <!-- COURSE DETAILS VIEW -->
+  <section id="view-courseDetails" class="view">
+    <button class="btn btn-small" onclick="showView('courses')">&larr; Natrag na popis</button>
+    <div id="courseDetailsContent"></div>
+  </section>
+
+  <!-- MY ENROLLMENTS VIEW -->
+  <section id="view-myEnrollments" class="view">
+    <h2>Moji tečajevi</h2>
+    <div id="myEnrollmentsList"></div>
+  </section>
+
+  <!-- ADMIN VIEW -->
+  <section id="view-admin" class="view">
+    <h2>Administracija</h2>
+    <div class="tabs">
+      <button data-admintab="categories" class="active">Kategorije</button>
+      <button data-admintab="courses">Tečajevi</button>
+      <button data-admintab="lessons">Lekcije</button>
+      <button data-admintab="tests">Testovi</button>
+    </div>
+
+    <div id="admin-categories" class="card">
+      <h3>Nova kategorija</h3>
+      <form class="inline" onsubmit="event.preventDefault(); createCategory();">
+        <div><label>Naziv</label><input id="newCategoryName" required /></div>
+        <div><label>Opis</label><input id="newCategoryDesc" /></div>
+        <button class="btn btn-primary" type="submit">Dodaj</button>
+      </form>
+      <div id="adminCategoriesList"></div>
+    </div>
+
+    <div id="admin-courses" class="card" style="display:none">
+      <h3>Novi tečaj</h3>
+      <form class="inline" onsubmit="event.preventDefault(); createCourse();">
+        <div><label>Naslov</label><input id="newCourseTitle" required /></div>
+        <div><label>Predavač</label><input id="newCourseInstructor" required /></div>
+        <div><label>Cijena (€)</label><input id="newCoursePrice" type="number" step="0.01" required /></div>
+        <div>
+          <label>Kategorija</label>
+          <select id="newCourseCategory" required></select>
+        </div>
+        <div style="flex-basis:100%"><label>Opis</label><textarea id="newCourseDesc" rows="2"></textarea></div>
+        <button class="btn btn-primary" type="submit">Dodaj tečaj</button>
+      </form>
+      <div id="adminCoursesList"></div>
+    </div>
+
+    <div id="admin-lessons" class="card" style="display:none">
+      <h3>Nova lekcija</h3>
+      <form class="inline" onsubmit="event.preventDefault(); createLesson();">
+        <div>
+          <label>Tečaj</label>
+          <select id="newLessonCourse" required></select>
+        </div>
+        <div><label>Naslov</label><input id="newLessonTitle" required /></div>
+        <div><label>Redoslijed</label><input id="newLessonOrder" type="number" value="1" /></div>
+        <div style="flex-basis:100%"><label>Sadržaj</label><textarea id="newLessonContent" rows="2"></textarea></div>
+        <button class="btn btn-primary" type="submit">Dodaj lekciju</button>
+      </form>
+    </div>
+
+    <div id="admin-tests" class="card" style="display:none">
+      <h3>Novi test</h3>
+      <form class="inline" onsubmit="event.preventDefault(); createTest();">
+        <div>
+          <label>Tečaj</label>
+          <select id="newTestCourse" required></select>
+        </div>
+        <div><label>Naslov testa</label><input id="newTestTitle" required /></div>
+        <button class="btn btn-primary" type="submit">Dodaj test</button>
+      </form>
+
+      <h3>Novo pitanje</h3>
+      <form class="inline" onsubmit="event.preventDefault(); addQuestion();">
+        <div>
+          <label>ID testa</label>
+          <input id="newQuestionTestId" type="number" required />
+        </div>
+        <div style="flex-basis:100%"><label>Pitanje</label><input id="newQuestionText" required /></div>
+        <div><label>Opcija A</label><input id="newQuestionA" required /></div>
+        <div><label>Opcija B</label><input id="newQuestionB" required /></div>
+        <div><label>Opcija C</label><input id="newQuestionC" required /></div>
+        <div><label>Opcija D</label><input id="newQuestionD" required /></div>
+        <div>
+          <label>Točan odgovor</label>
+          <select id="newQuestionCorrect">
+            <option>A</option><option>B</option><option>C</option><option>D</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Dodaj pitanje</button>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
