@@ -12,7 +12,7 @@ Ovo je završni repozitorij za .NET 8 Web API aplikaciju namijenjenu upravljanju
 - **Deployment & Publish:** Projekt sadrži generiranu `publish` mapu i `web.config` datoteku koja dokazuje spremnost za lokalni ili IIS deployment.
 - **Klijent:** Uključena je jednostavna frontend aplikacija (HTML/JS) koja demonstrira komunikaciju s API-jem.
 
-## 🚀 Pokretanje i Testiranje
+## Pokretanje i Testiranje
 
 **Pokretanje API-ja lokalno:**
 ```bash
